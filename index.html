@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Артем Туманов — софт</title>
+  <style>
+    :root {
+      --bg: #07080a;
+      --card: #101318;
+      --line: #1d232c;
+      --text: #e8edf2;
+      --dim: #8b97a6;
+      --acc: #5eead4;
+      --btn: #1e2933;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.45 "Segoe UI", system-ui, sans-serif; }
+    a { color: var(--acc); text-decoration: none; }
+    header { max-width: 1100px; margin: 0 auto; padding: 48px 24px 16px; }
+    header h1 { font-size: 28px; font-weight: 650; letter-spacing: -0.03em; margin: 0 0 8px; }
+    header p { color: var(--dim); margin: 0; max-width: 52ch; }
+    .links { margin-top: 16px; display: flex; gap: 16px; flex-wrap: wrap; }
+    .grid { max-width: 1100px; margin: 0 auto; padding: 24px; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+    article { background: var(--card); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; }
+    article img { width: 100%; height: 180px; object-fit: cover; object-position: top; background: #000; cursor: zoom-in; display: block; }
+    .body { padding: 16px 16px 18px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
+    .body h2 { margin: 0; font-size: 18px; }
+    .tag { color: var(--dim); font-size: 13px; }
+    .row { display: flex; gap: 8px; margin-top: auto; }
+    .btn { flex: 1; text-align: center; padding: 10px 12px; border-radius: 8px; background: var(--btn); color: var(--text); border: 1px solid var(--line); font-size: 14px; cursor: pointer; }
+    .btn.dl { background: #12332e; border-color: #1c4d44; color: var(--acc); }
+    .btn:hover { filter: brightness(1.12); }
+    footer { max-width: 1100px; margin: 0 auto; padding: 8px 24px 48px; color: var(--dim); font-size: 13px; }
+    dialog { border: 1px solid var(--line); background: #000; padding: 0; max-width: min(1100px, 96vw); }
+    dialog img { width: 100%; display: block; }
+    dialog::backdrop { background: rgba(0,0,0,.75); }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Артем Туманов</h1>
+    <p>C++20 · Go · Rust · Python · Assembler. На странице — скрин, как софт выглядит. Кнопка «скачать» — живой бинарь, не гифка.</p>
+    <div class="links">
+      <a href="https://github.com/gwbbej9-byte">GitHub</a>
+      <a href="https://hh.ru/resume/e9197460ff115e6e080039ed1f444e724438337">HeadHunter</a>
+    </div>
+  </header>
+  <main class="grid" id="grid"></main>
+  <footer>Windows x64, кроме nasmhex — это Linux ELF. winpulse просит .NET 8 Desktop Runtime. Исходники в репозиториях.</footer>
+  <dialog id="shot"><img alt=""></dialog>
+  <script>
+    const apps = [
+      { id: "crypto-box", title: "crypto-box", tag: "C++20 Win32 · AES-256-GCM", run: "открой exe, пароль, Encrypt / Decrypt", os: "win" },
+      { id: "cert-lens", title: "cert-lens", tag: "C++20 Win32 · X.509 Crypt32", run: "открой exe, Open certificate → example.pem", os: "win" },
+      { id: "hdrchain", title: "hdrchain", tag: "C++20 CLI · SHA-256d Merkle PoW", run: "hdrchain.exe genesis chain.hdrc coinbase", os: "win" },
+      { id: "winpulse", title: "winpulse", tag: ".NET 8 WinForms · процессы CPU RSS", run: "нужен .NET 8 Desktop, потом WinPulse.exe", os: "win" },
+      { id: "twinseek", title: "twinseek", tag: "Rust · дубликаты SHA-256", run: "twinseek.exe scan .", os: "win" },
+      { id: "logship", title: "logship", tag: "Go · concurrent tail /healthz", run: "logship.exe tail app.log api.log --listen :8080", os: "win" },
+      { id: "pulsecheck", title: "pulsecheck", tag: "Python → exe · HTTP/TCP TUI", run: "pulsecheck.exe demo", os: "win" },
+      { id: "harborlm", title: "harborlm", tag: "Python → exe · local GGUF TUI", run: "harborlm.exe chat --demo", os: "win" },
+      { id: "nasmhex", title: "nasmhex", tag: "NASM x86-64 Linux · без libc", run: "chmod +x nasmhex && ./nasmhex hello.bin", os: "linux" }
+    ];
+    const grid = document.getElementById("grid");
+    const dlg = document.getElementById("shot");
+    const dlgImg = dlg.querySelector("img");
+    for (const a of apps) {
+      const el = document.createElement("article");
+      el.innerHTML = `
+        <img src="shots/${a.id}.png" alt="${a.title}" data-full="shots/${a.id}.png">
+        <div class="body">
+          <h2>${a.title}</h2>
+          <div class="tag">${a.tag}</div>
+          <div class="tag">${a.run}</div>
+          <div class="row">
+            <a class="btn" href="https://github.com/gwbbej9-byte/${a.id}">код</a>
+            <a class="btn dl" href="downloads/${a.id}.zip" download>скачать</a>
+          </div>
+        </div>`;
+      el.querySelector("img").addEventListener("click", (e) => {
+        dlgImg.src = e.currentTarget.dataset.full;
+        dlgImg.alt = a.title;
+        dlg.showModal();
+      });
+      grid.appendChild(el);
+    }
+    dlg.addEventListener("click", () => dlg.close());
+  </script>
+</body>
+</html>
