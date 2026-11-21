@@ -3,88 +3,264 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Артем Туманов — софт</title>
+  <title>Артем Туманов — потыкай софт</title>
+  <meta name="description" content="C++ Go Rust Python NASM. Файл шифруется в браузере тем же CBOX v1, что exe.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect fill='%2309090b' width='16' height='16'/><rect fill='%232dd4bf' x='3' y='11' width='10' height='1'/></svg>">
   <style>
     :root {
-      --bg: #07080a;
-      --card: #101318;
-      --line: #1d232c;
-      --text: #e8edf2;
-      --dim: #8b97a6;
-      --acc: #5eead4;
-      --btn: #1e2933;
+      --bg: #09090b;
+      --fg: #f4f4f5;
+      --dim: #a1a1aa;
+      --mute: #71717a;
+      --line: #27272a;
+      --card: #0c0c0e;
+      --acc: #2dd4bf;
+      --acc-dim: rgba(45, 212, 191, .14);
+      --warn: #fbbf24;
+      --err: #fb7185;
+      --ok: #4ade80;
     }
     * { box-sizing: border-box; }
-    html, body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.45 "Segoe UI", system-ui, sans-serif; }
+    html, body { margin: 0; background: var(--bg); color: var(--fg); }
+    html { scroll-behavior: smooth; }
+    body {
+      font: 15px/1.5 "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+      letter-spacing: -0.011em;
+    }
     a { color: var(--acc); text-decoration: none; }
-    header { max-width: 1100px; margin: 0 auto; padding: 48px 24px 16px; }
-    header h1 { font-size: 28px; font-weight: 650; letter-spacing: -0.03em; margin: 0 0 8px; }
-    header p { color: var(--dim); margin: 0; max-width: 52ch; }
-    .links { margin-top: 16px; display: flex; gap: 16px; flex-wrap: wrap; }
-    .grid { max-width: 1100px; margin: 0 auto; padding: 24px; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
-    article { background: var(--card); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; }
-    article img { width: 100%; height: 180px; object-fit: cover; object-position: top; background: #000; cursor: zoom-in; display: block; }
-    .body { padding: 16px 16px 18px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
-    .body h2 { margin: 0; font-size: 18px; }
-    .tag { color: var(--dim); font-size: 13px; }
-    .row { display: flex; gap: 8px; margin-top: auto; }
-    .btn { flex: 1; text-align: center; padding: 10px 12px; border-radius: 8px; background: var(--btn); color: var(--text); border: 1px solid var(--line); font-size: 14px; cursor: pointer; }
-    .btn.dl { background: #12332e; border-color: #1c4d44; color: var(--acc); }
-    .btn:hover { filter: brightness(1.12); }
-    footer { max-width: 1100px; margin: 0 auto; padding: 8px 24px 48px; color: var(--dim); font-size: 13px; }
-    dialog { border: 1px solid var(--line); background: #000; padding: 0; max-width: min(1100px, 96vw); }
-    dialog img { width: 100%; display: block; }
-    dialog::backdrop { background: rgba(0,0,0,.75); }
+    a:hover { text-decoration: underline; text-underline-offset: 3px; }
+    button, input, textarea, select { font: inherit; color: inherit; }
+    .progress {
+      position: fixed; inset: 0 0 auto 0; height: 2px; z-index: 80;
+      background: var(--acc); transform: scaleX(0); transform-origin: 0 50%;
+      animation: grow linear; animation-timeline: scroll();
+    }
+    @keyframes grow { to { transform: scaleX(1); } }
+    .noise {
+      position: fixed; inset: 0; pointer-events: none; z-index: 60; opacity: .04;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    }
+    .hero {
+      position: relative;
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 72px 24px 40px;
+      overflow: clip;
+    }
+    .hero::before {
+      content: "";
+      position: absolute; inset: -10% -5% auto -5%; height: 420px;
+      background-image:
+        linear-gradient(to right, #1c1c20 1px, transparent 1px),
+        linear-gradient(to bottom, #1c1c20 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: radial-gradient(ellipse 70% 80% at 30% 0%, #000 20%, transparent 70%);
+      pointer-events: none;
+    }
+    .kicker {
+      position: relative;
+      color: var(--acc);
+      font: 12px/1 ui-monospace, "Cascadia Mono", Consolas, monospace;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      margin: 0 0 18px;
+    }
+    h1 {
+      position: relative;
+      margin: 0 0 16px;
+      font-size: clamp(2.4rem, 6vw, 4.1rem);
+      font-weight: 600;
+      letter-spacing: -0.045em;
+      line-height: .95;
+      max-width: 14ch;
+    }
+    .lede {
+      position: relative;
+      margin: 0;
+      max-width: 46ch;
+      color: var(--dim);
+      font-size: 17px;
+    }
+    .links { position: relative; display: flex; gap: 18px; flex-wrap: wrap; margin-top: 22px; }
+    .hint {
+      position: relative;
+      margin-top: 28px;
+      color: var(--mute);
+      font: 12px/1.4 ui-monospace, Consolas, monospace;
+    }
+    .rail {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 8px 24px 80px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 14px;
+    }
+    .card {
+      position: relative;
+      display: flex; flex-direction: column;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow: hidden;
+      isolation: isolate;
+      animation: rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 36%;
+    }
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(18px); }
+      to { opacity: 1; transform: none; }
+    }
+    .card::before {
+      content: "";
+      position: absolute; inset: 0; z-index: 1; pointer-events: none;
+      background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 0%), rgba(45,212,191,.13), transparent 42%);
+      opacity: 0; transition: opacity .25s;
+    }
+    .card:hover::before { opacity: 1; }
+    .card img {
+      width: 100%; height: 168px; object-fit: cover; object-position: top;
+      background: #000; display: block; filter: saturate(.92);
+    }
+    .body { padding: 16px 16px 18px; display: flex; flex-direction: column; gap: 8px; flex: 1; position: relative; z-index: 2; }
+    .body h2 { margin: 0; font-size: 16px; letter-spacing: -0.03em; }
+    .tag { color: var(--mute); font-size: 12.5px; }
+    .pill {
+      display: inline-flex; align-self: flex-start;
+      font: 11px/1 ui-monospace, Consolas, monospace;
+      letter-spacing: .04em; text-transform: uppercase;
+      color: var(--acc); background: var(--acc-dim);
+      border-radius: 999px; padding: 4px 8px;
+    }
+    .pill.mock { color: var(--warn); background: rgba(251,191,36,.1); }
+    .row { display: flex; gap: 8px; margin-top: auto; padding-top: 10px; }
+    .btn {
+      flex: 1; text-align: center; padding: 9px 10px; border-radius: 8px;
+      background: #151518; color: var(--fg); border: 1px solid var(--line);
+      font-size: 13px; cursor: pointer; text-decoration: none;
+    }
+    .btn:hover { text-decoration: none; border-color: #3f3f46; }
+    .btn.go { background: #0f2a26; border-color: #164e48; color: var(--acc); }
+    .btn.dl { background: transparent; }
+    footer {
+      max-width: 1120px; margin: 0 auto; padding: 0 24px 56px;
+      color: var(--mute); font-size: 12px;
+    }
+    .bench {
+      position: fixed; inset: 0; z-index: 70;
+      background: color-mix(in srgb, var(--bg) 78%, transparent);
+      backdrop-filter: blur(10px);
+      display: grid; place-items: center; padding: 24px;
+    }
+    .bench[hidden] { display: none; }
+    .panel {
+      position: relative;
+      width: min(920px, 100%);
+      max-height: min(88vh, 900px);
+      overflow: auto;
+      background: #0b0b0d;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 22px 64px 24px 22px;
+      box-shadow: 0 0 0 1px #000;
+    }
+    .panel h3 { margin: 0 0 4px; font-size: 20px; letter-spacing: -0.03em; }
+    .sub { color: var(--dim); font-size: 13px; margin: 0 0 16px; }
+    .drop {
+      border: 1px dashed #3f3f46; border-radius: 10px; padding: 22px;
+      text-align: center; color: var(--dim); cursor: pointer;
+      transition: border-color .15s, background .15s;
+    }
+    .drop.over, .drop:hover { border-color: var(--acc); background: var(--acc-dim); }
+    .field { display: flex; flex-direction: column; gap: 6px; margin: 12px 0; }
+    .field label { font-size: 12px; color: var(--mute); }
+    input[type=password], input[type=text], textarea, select {
+      background: #111113; border: 1px solid var(--line); border-radius: 8px;
+      padding: 10px 12px; outline: none;
+    }
+    input:focus, textarea:focus { border-color: #3f3f46; }
+    textarea { min-height: 90px; resize: vertical; width: 100%; }
+    .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+    .actions .btn { flex: 0 1 auto; min-width: 140px; }
+    .term {
+      font: 12px/1.45 ui-monospace, "Cascadia Mono", Consolas, monospace;
+      background: #050506; border: 1px solid var(--line); border-radius: 8px;
+      padding: 12px; white-space: pre-wrap; overflow: auto; max-height: 340px;
+      color: #d4d4d8; margin-top: 12px;
+    }
+    .term .e { color: var(--err); }
+    .term .w { color: var(--warn); }
+    .term .i { color: var(--acc); }
+    .term .ok { color: var(--ok); }
+    .stat { font: 12px/1.4 ui-monospace, Consolas, monospace; color: var(--mute); margin-top: 10px; }
+    .close {
+      position: absolute; top: 16px; right: 16px;
+      background: transparent; border: 1px solid var(--line);
+      border-radius: 8px; padding: 6px 10px; cursor: pointer; color: var(--dim);
+    }
+    .kv { display: grid; grid-template-columns: 120px 1fr; gap: 6px 12px; font-size: 13px; margin-top: 12px; overflow-wrap: anywhere; }
+    .kv b { color: var(--mute); font-weight: 500; }
+    .bars { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+    .bar-row { display: grid; grid-template-columns: 140px 1fr 48px; gap: 10px; align-items: center; font-size: 12px; }
+    .bar { height: 6px; background: #18181b; border-radius: 99px; overflow: hidden; }
+    .bar > i { display: block; height: 100%; background: var(--acc); width: 0%; transition: width .4s; }
+    .chat { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; max-height: 280px; overflow: auto; }
+    .bubble { padding: 8px 10px; border-radius: 8px; max-width: 80%; font-size: 13px; }
+    .bubble.me { align-self: flex-end; background: #151518; }
+    .bubble.bot { align-self: flex-start; background: #0f2a26; color: #ccfbf1; }
+    .cmd {
+      position: fixed; inset: 18vh 0 auto; z-index: 90; display: grid; place-items: start center;
+      pointer-events: none;
+    }
+    .cmd[hidden] { display: none; }
+    .cmd-box {
+      pointer-events: auto; width: min(520px, calc(100% - 32px));
+      background: #111113; border: 1px solid var(--line); border-radius: 12px;
+      overflow: hidden;
+    }
+    .cmd-box input {
+      width: 100%; border: 0; border-bottom: 1px solid var(--line); border-radius: 0;
+      padding: 14px 16px; background: transparent;
+    }
+    .cmd-list button {
+      display: block; width: 100%; text-align: left; background: transparent; border: 0;
+      padding: 10px 16px; cursor: pointer; color: var(--dim);
+    }
+    .cmd-list button:hover, .cmd-list button.on { background: #18181b; color: var(--fg); }
+    @media (prefers-reduced-motion: reduce) {
+      .progress, .card { animation: none; }
+      html { scroll-behavior: auto; }
+      .card::before { display: none; }
+    }
   </style>
 </head>
 <body>
-  <header>
-    <h1>Артем Туманов</h1>
-    <p>C++20 · Go · Rust · Python · Assembler. На странице — скрин, как софт выглядит. Кнопка «скачать» — живой бинарь, не гифка.</p>
+  <div class="progress" aria-hidden="true"></div>
+  <div class="noise" aria-hidden="true"></div>
+  <header class="hero">
+    <p class="kicker">gwbbej9-byte · Windows x64</p>
+    <h1>софт, который можно потыкать</h1>
+    <p class="lede">не гифка. crypto-box шифрует твой файл в браузере тем же CBOX v1, что exe — AES-256-GCM, PBKDF2 210000. ничего не уходит на сервер.</p>
     <div class="links">
       <a href="https://github.com/gwbbej9-byte">GitHub</a>
       <a href="https://hh.ru/resume/e9197460ff115e6e080039ed1f444e724438337">HeadHunter</a>
+      <a href="#" id="open-cmd">⌘K / Ctrl+K</a>
     </div>
+    <p class="hint">клик «запустить» · файл остаётся на машине · nasmhex — Linux ELF в zip</p>
   </header>
-  <main class="grid" id="grid"></main>
-  <footer>Windows x64, кроме nasmhex — это Linux ELF. winpulse просит .NET 8 Desktop Runtime. Исходники в репозиториях.</footer>
-  <dialog id="shot"><img alt=""></dialog>
-  <script>
-    const apps = [
-      { id: "crypto-box", title: "crypto-box", tag: "C++20 Win32 · AES-256-GCM", run: "открой exe, пароль, Encrypt / Decrypt", os: "win" },
-      { id: "cert-lens", title: "cert-lens", tag: "C++20 Win32 · X.509 Crypt32", run: "открой exe, Open certificate → example.pem", os: "win" },
-      { id: "hdrchain", title: "hdrchain", tag: "C++20 CLI · SHA-256d Merkle PoW", run: "hdrchain.exe genesis chain.hdrc coinbase", os: "win" },
-      { id: "winpulse", title: "winpulse", tag: ".NET 8 WinForms · процессы CPU RSS", run: "нужен .NET 8 Desktop, потом WinPulse.exe", os: "win" },
-      { id: "twinseek", title: "twinseek", tag: "Rust · дубликаты SHA-256", run: "twinseek.exe scan .", os: "win" },
-      { id: "logship", title: "logship", tag: "Go · concurrent tail /healthz", run: "logship.exe tail app.log api.log --listen :8080", os: "win" },
-      { id: "pulsecheck", title: "pulsecheck", tag: "Python → exe · HTTP/TCP TUI", run: "pulsecheck.exe demo", os: "win" },
-      { id: "harborlm", title: "harborlm", tag: "Python → exe · local GGUF TUI", run: "harborlm.exe chat --demo", os: "win" },
-      { id: "nasmhex", title: "nasmhex", tag: "NASM x86-64 Linux · без libc", run: "chmod +x nasmhex && ./nasmhex hello.bin", os: "linux" }
-    ];
-    const grid = document.getElementById("grid");
-    const dlg = document.getElementById("shot");
-    const dlgImg = dlg.querySelector("img");
-    for (const a of apps) {
-      const el = document.createElement("article");
-      el.innerHTML = `
-        <img src="shots/${a.id}.png" alt="${a.title}" data-full="shots/${a.id}.png">
-        <div class="body">
-          <h2>${a.title}</h2>
-          <div class="tag">${a.tag}</div>
-          <div class="tag">${a.run}</div>
-          <div class="row">
-            <a class="btn" href="https://github.com/gwbbej9-byte/${a.id}">код</a>
-            <a class="btn dl" href="downloads/${a.id}.zip" download>скачать</a>
-          </div>
-        </div>`;
-      el.querySelector("img").addEventListener("click", (e) => {
-        dlgImg.src = e.currentTarget.dataset.full;
-        dlgImg.alt = a.title;
-        dlg.showModal();
-      });
-      grid.appendChild(el);
-    }
-    dlg.addEventListener("click", () => dlg.close());
-  </script>
+  <main class="rail" id="rail"></main>
+  <footer>Артем Туманов. winpulse просит .NET 8 Desktop Runtime. исходники в репозиториях. playground — Web Crypto / SHA-256, без бэкенда.</footer>
+
+  <div class="bench" id="bench" hidden>
+    <div class="panel" id="panel"></div>
+  </div>
+  <div class="cmd" id="cmd" hidden>
+    <div class="cmd-box">
+      <input id="cmd-q" placeholder="crypto-box, cert, hex…" autocomplete="off">
+      <div class="cmd-list" id="cmd-list"></div>
+    </div>
+  </div>
+  <script src="app.js"></script>
 </body>
 </html>
